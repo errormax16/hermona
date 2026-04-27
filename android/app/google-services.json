@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "283017326348",
+    "firebase_url": "https://hermona-6a626-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "hermona-6a626",
+    "storage_bucket": "hermona-6a626.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:283017326348:android:fe38b0d4a7ea07d81da329",
+        "android_client_info": {
+          "package_name": "com.acneia.acneia"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "283017326348-o0vbpcucd7p82gie151fapk7826e0kk2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAva3wH9PYCh3u_PodvqNHzkkf4K5o04pE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "283017326348-o0vbpcucd7p82gie151fapk7826e0kk2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
