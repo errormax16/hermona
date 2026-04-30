@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+
+ultralytics
+
+opencv-python-headless
+numpy
+Pillow
+
+python-multipart
+
+# optionnel mais recommandé
+scipy

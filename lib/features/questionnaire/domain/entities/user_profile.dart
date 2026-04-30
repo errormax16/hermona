@@ -55,9 +55,13 @@ class UserProfile {
       hormonalTreatment: json['hormonalTreatment'] ?? '',
       acneTreatment: json['acneTreatment'] ?? '',
       skincareRoutine: List<String>.from(json['skincareRoutine'] ?? []),
-      lastPeriodsDate: (json['lastPeriodsDate'] as Timestamp).toDate(),
+      lastPeriodsDate: json['lastPeriodsDate'] is Timestamp
+      ? (json['lastPeriodsDate'] as Timestamp).toDate()
+      : DateTime.now(),
       lastCyclesDuration: List<int>.from(json['lastCyclesDuration'] ?? []),
-      initialPhotos: Map<String, String>.from(json['initialPhotos'] ?? {}),
+      initialPhotos: json['initialPhotos'] != null
+    ? Map<String, String>.from(json['initialPhotos'])
+    : <String, String>{},
     );
   }
 

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
@@ -37,6 +38,28 @@ class DetectionResultScreen extends StatelessWidget {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(children: [
+
+          // ── Annotated Images ────────────────────────────────────────────
+          if (result.imageUrls.isNotEmpty)
+            ...result.imageUrls.map((url) {
+              if (url.startsWith('data:image')) {
+                final base64str = url.split(',').last;
+                return FadeInWidget(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.memory(
+                        base64Decode(base64str),
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            }),
 
           // ── Score card ──────────────────────────────────────────────────
           FadeInWidget(child: AppCard(child: Column(children: [

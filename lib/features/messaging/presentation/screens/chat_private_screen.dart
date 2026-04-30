@@ -81,9 +81,10 @@ class _ChatPrivateScreenState extends State<ChatPrivateScreen> {
                     if (!isMe) Container(margin: const EdgeInsets.only(right: 8), width: 32, height: 32,
                       decoration: BoxDecoration(color: AppTheme.primary.withOpacity(0.2), shape: BoxShape.circle),
                       child: Icon(Iconsax.user, size: 16, color: AppTheme.primary)),
-                    GestureDetector(
-                      onLongPress: isMe ? () => _deleteMsg(ctx, docs[i].id) : null,
-                      child: Flexible(child: Container(
+                    Flexible(
+                      child: GestureDetector(
+                        onLongPress: isMe ? () => _deleteMsg(ctx, docs[i].id) : null,
+                        child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
                           gradient: isMe ? LinearGradient(colors: [AppTheme.primary, AppColors.secondary]) : null,

@@ -6,7 +6,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -30,7 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadUser();
-    _checkWelcome();
   }
 
   void _loadUser() {
@@ -40,56 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
         .collection(AppConstants.colUsers).doc(uid).get()
         .then((d) { if (d.exists && mounted) setState(() => _firstName = d.data()?['firstName'] as String?); });
   }
-
-  Future<void> _checkWelcome() async {
-    final p = await SharedPreferences.getInstance();
-    if (!(p.getBool(AppConstants.keyWelcomeShown) ?? false) && mounted) {
-      await p.setBool(AppConstants.keyWelcomeShown, true);
-      WidgetsBinding.instance.addPostFrameCallback((_) => _showWelcome());
-    }
-  }
-
-  void _showWelcome() {
-    showDialog(context: context, barrierDismissible: false, builder: (ctx) => Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-      child: Padding(padding: const EdgeInsets.all(28), child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [AppTheme.primary.withOpacity(0.2), AppColors.secondary.withOpacity(0.1)]),
-            shape: BoxShape.circle),
-          child: const Text('🌸', style: TextStyle(fontSize: 48)),
-        ).animate().scale(duration: 600.ms, curve: Curves.elasticOut),
-        const SizedBox(height: 18),
-        Text('Bienvenue, ${_firstName ?? 'beauté'} ! 💕',
-          style: Theme.of(ctx).textTheme.displaySmall, textAlign: TextAlign.center)
-            .animate().fadeIn(delay: 200.ms),
-        const SizedBox(height: 10),
-        Text('AcnéIA vous accompagne dans votre parcours beauté. Analysez votre peau et recevez des recommandations personnalisées !',
-          style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(height: 1.6), textAlign: TextAlign.center)
-            .animate().fadeIn(delay: 300.ms),
-        const SizedBox(height: 20),
-        _feat(ctx, Iconsax.scan,    'Analyse IA de votre peau'),
-        const SizedBox(height: 8),
-        _feat(ctx, Iconsax.star,    'Routines personnalisées'),
-        const SizedBox(height: 8),
-        _feat(ctx, Iconsax.chart_2, 'Prédictions & suivi'),
-        const SizedBox(height: 8),
-        _feat(ctx, Iconsax.people,  'Communauté anonyme'),
-        const SizedBox(height: 24),
-        GradientButton(text: 'C\'est parti ! 🚀', onPressed: () => Navigator.pop(ctx))
-            .animate().fadeIn(delay: 500.ms),
-      ])),
-    ));
-  }
-
-  Widget _feat(BuildContext ctx, IconData icon, String text) => Row(children: [
-    Container(padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(color: AppTheme.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-      child: Icon(icon, size: 16, color: AppTheme.primary)),
-    const SizedBox(width: 10),
-    Text(text, style: Theme.of(ctx).textTheme.bodyMedium),
-  ]);
 
   Future<void> _pick(ImageSource src) async {
     try {
@@ -125,65 +73,134 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(slivers: [
-        // AppBar
-        SliverAppBar(
-          expandedHeight: 110, floating: true, snap: true,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          flexibleSpace: FlexibleSpaceBar(
-            titlePadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          children: [
+            // Header
+            Row(
               children: [
-                Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.end, children: [
-                  Text('Bonjour ${_firstName ?? ''} 🌸', style: Theme.of(context).textTheme.headlineLarge),
-                  Text('Comment va votre peau ?', style: Theme.of(context).textTheme.bodySmall),
-                ]),
-                Row(children: [
-                  IconButton(icon: const Icon(Iconsax.message_text), onPressed: () => context.push('/messages')),
-                  IconButton(icon: const Icon(Iconsax.people),       onPressed: () => context.push('/forum')),
-                ]),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Bonjour ${_firstName ?? ''} 👋',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Prête à prendre soin de ta peau ?',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ),
+                CircleAvatar(
+                  backgroundColor: AppTheme.primary.withOpacity(0.1),
+                  child: const Text('🌸', style: TextStyle(fontSize: 20)),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Iconsax.logout),
+                  color: AppColors.error,
+                  onPressed: () async {
+                    await FirebaseAuth.instance.signOut();
+                    if (context.mounted) context.go('/welcome');
+                  },
+                ),
               ],
-            ),
-          ),
+            ).animate().fadeIn().slideY(begin: -0.2),
+            
+            const SizedBox(height: 32),
+            
+            // Questionnaires Dashboard
+            SectionTitle(title: 'Suivi & Bilans', action: '', onAction: () {}),
+            const SizedBox(height: 16),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
+              child: Row(
+                children: [
+                  _buildSurveyCard(
+                    context, 
+                    title: 'Mon Profil', 
+                    subtitle: 'Onboarding', 
+                    icon: Iconsax.user, 
+                    color: AppTheme.primary, 
+                    onTap: () => context.push('/onboarding')
+                  ),
+                  const SizedBox(width: 16),
+                  _buildSurveyCard(
+                    context, 
+                    title: 'Bilan', 
+                    subtitle: 'Quotidien', 
+                    icon: Iconsax.calendar_1, 
+                    color: AppColors.secondary, 
+                    onTap: () => context.push('/daily-survey')
+                  ),
+                  const SizedBox(width: 16),
+                  _buildSurveyCard(
+                    context, 
+                    title: 'Bilan', 
+                    subtitle: 'Hebdomadaire', 
+                    icon: Iconsax.health, 
+                    color: AppColors.accent, 
+                    onTap: () => context.push('/weekly-survey')
+                  ),
+                ],
+              ),
+            ).animate().fadeIn(delay: 200.ms).slideX(begin: 0.2),
+
+            const SizedBox(height: 32),
+
+            // AI Analysis Section
+            SectionTitle(title: 'Analyse de peau IA', action: '', onAction: () {}),
+            const SizedBox(height: 16),
+            _buildLastAnalysis(),
+            const SizedBox(height: 16),
+            _buildUploadZone(),
+            if (_images.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _buildPreviews(),
+              const SizedBox(height: 16),
+              GradientButton(
+                text: _analyzing ? 'Analyse en cours...' : 'Analyser les photos',
+                onPressed: _analyzing ? null : _analyze,
+              ).animate().fadeIn().slideY(begin: 0.1),
+            ],
+
+            const SizedBox(height: 32),
+            _buildShortcuts(),
+            const SizedBox(height: 32),
+          ],
         ),
+      ),
+    );
+  }
 
-        SliverPadding(padding: const EdgeInsets.all(20), sliver: SliverList(delegate: SliverChildListDelegate([
-          _buildLastAnalysis(),
-          const SizedBox(height: 22),
-
-          Text('Analyser ma peau', style: Theme.of(context).textTheme.headlineLarge)
-              .animate().fadeIn(delay: 200.ms),
-          const SizedBox(height: 4),
-          Text('Ajoutez des photos pour une analyse IA', style: Theme.of(context).textTheme.bodySmall)
-              .animate().fadeIn(delay: 280.ms),
-          const SizedBox(height: 14),
-
-          // Photo tips
-          _buildPhotoTips(),
-          const SizedBox(height: 14),
-
-          // Upload zone
-          _buildUploadZone(),
-          const SizedBox(height: 14),
-
-          // Previews
-          if (_images.isNotEmpty) ...[_buildPreviews(), const SizedBox(height: 14)],
-
-          if (_images.isNotEmpty)
-            GradientButton(
-              text: _analyzing ? 'Analyse en cours...' : 'Analyser ma peau 🔬',
-              icon: _analyzing ? null : Iconsax.scan,
-              onPressed: _analyzing ? null : _analyze,
-              isLoading: _analyzing,
-            ).animate().fadeIn().slideY(begin: 0.15),
-
-          const SizedBox(height: 22),
-          _buildShortcuts(),
-          const SizedBox(height: 80),
-        ]))),
-      ]),
+  Widget _buildSurveyCard(BuildContext context, {required String title, required String subtitle, required IconData icon, required Color color, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 120,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withOpacity(0.2)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 16),
+            Text(title, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14)),
+            const SizedBox(height: 4),
+            Text(subtitle, style: TextStyle(color: color.withOpacity(0.8), fontSize: 12)),
+          ],
+        ),
+      ),
     );
   }
 
@@ -233,36 +250,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildPhotoTips() {
-    return AppCard(
-      color: AppTheme.primary.withOpacity(0.04),
-      child: ExpansionTile(
-        tilePadding: EdgeInsets.zero,
-        title: Row(children: [
-          Icon(Iconsax.info_circle, color: AppTheme.primary, size: 18),
-          const SizedBox(width: 8),
-          Text('Conseils photo', style: Theme.of(context).textTheme.labelLarge),
-        ]),
-        children: [Padding(
-          padding: const EdgeInsets.only(bottom: 6),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Bonnes pratiques', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 4),
-              Text(AppConstants.photoTipsGood, style: Theme.of(context).textTheme.bodySmall),
-            ])),
-            const SizedBox(width: 12),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('À éviter', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 4),
-              Text(AppConstants.photoTipsBad, style: Theme.of(context).textTheme.bodySmall),
-            ])),
-          ]),
-        )],
-      ),
-    );
-  }
-
   Widget _buildUploadZone() {
     return Row(children: [
       Expanded(child: GestureDetector(
@@ -275,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             Icon(Iconsax.camera, color: AppTheme.primary, size: 28),
             const SizedBox(height: 8),
-            Text('Prendre une photo', style: TextStyle(color: AppTheme.primary, fontSize: 12, fontWeight: FontWeight.w600)),
+            Text('Prendre photo', style: TextStyle(color: AppTheme.primary, fontSize: 12, fontWeight: FontWeight.w600)),
           ]),
         ),
       ).animate().fadeIn(delay: 360.ms).slideX(begin: -0.08)),

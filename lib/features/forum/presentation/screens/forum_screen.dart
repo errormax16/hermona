@@ -89,7 +89,7 @@ class _ForumScreenState extends State<ForumScreen> {
                        (data['content'] as String? ?? '').toLowerCase().contains(q);
               }).toList();
             }
-            if (docs.isEmpty) return EmptyState(icon: Iconsax.people, title: 'Aucun post', subtitle: 'Soyez la première à créer un sujet !',
+            if (docs.isEmpty) return EmptyState(icon: Iconsax.people, title: 'Pas de post', subtitle: 'Soyez le premier à poster',
                 action: TextButton(onPressed: () => context.push('/forum/create'), child: const Text('Créer un post')));
             return ListView.separated(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),

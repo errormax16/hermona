@@ -163,22 +163,66 @@ class _FirestoreList extends StatelessWidget {
     if (extraWhere != null) {
       extraWhere!.forEach((k, v) => q = q.where(k, isEqualTo: v));
     }
-    q = q.orderBy(orderField, descending: true).limit(30);
+    // Retiré: .orderBy() pour éviter les erreurs d'Index Composite Firestore !
 
     return StreamBuilder<QuerySnapshot>(
       stream: q.snapshots(),
       builder: (ctx, snap) {
-        if (!snap.hasData) return Padding(padding: const EdgeInsets.all(16),
-            child: Column(children: List.generate(4, (_) => Padding(padding: const EdgeInsets.only(bottom: 10), child: const SkeletonCard()))));
-        final docs = snap.data!.docs;
+        if (snap.hasError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Erreur Firestore : \n${snap.error}', 
+                style: const TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+            )
+          );
+        }
+        if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(children: List.generate(4, (_) => const Padding(padding: EdgeInsets.only(bottom: 10), child: SkeletonCard())))
+          );
+        }
+        
+        final docs = snap.data?.docs.toList() ?? [];
+        
+        // Tri local en Dart (remplace le orderBy de Firestore)
+        docs.sort((a, b) {
+           final dataA = a.data() as Map<String, dynamic>;
+           final dataB = b.data() as Map<String, dynamic>;
+           final tA = dataA[orderField];
+           final tB = dataB[orderField];
+           
+           if (tA == null && tB == null) return 0;
+           if (tA == null) return 1;
+           if (tB == null) return -1;
+           
+           DateTime? dtA, dtB;
+           if (tA is String) dtA = DateTime.tryParse(tA);
+           else if (tA is Timestamp) dtA = tA.toDate();
+           
+           if (tB is String) dtB = DateTime.tryParse(tB);
+           else if (tB is Timestamp) dtB = tB.toDate();
+
+           if (dtA == null || dtB == null) return 0;
+           return dtB.compareTo(dtA); // descending
+        });
+
         if (docs.isEmpty) return EmptyState(icon: emptyIcon, title: emptyTitle, subtitle: emptySubtitle);
+        
+        // Limiter à 30 après le tri
+        final displayDocs = docs.take(30).toList();
+
         return ListView.separated(
           padding: const EdgeInsets.all(16),
-          itemCount: docs.length,
+          itemCount: displayDocs.length,
           separatorBuilder: (_, __) => const SizedBox(height: 10),
           itemBuilder: (ctx, i) {
-            final data = docs[i].data() as Map<String, dynamic>;
-            return FadeInWidget(delay: i * 50, child: itemBuilder(ctx, data, docs[i].id));
+            final data = displayDocs[i].data() as Map<String, dynamic>;
+            return FadeInWidget(delay: i * 50, child: itemBuilder(ctx, data, displayDocs[i].id));
           },
         );
       },
