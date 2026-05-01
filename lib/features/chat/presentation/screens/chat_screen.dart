@@ -275,7 +275,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
           if (text.trim().isNotEmpty) {
             debugPrint(
-                "🎤 ✅ Sending transcribed text: ${text.substring(0, 50)}...");
+                "🎤 ✅ Sending transcribed text: ${text.length > 50 ? '${text.substring(0, 50)}...' : text}");
             _send(text, isVoice: true);
           } else {
             debugPrint("🎤 ⚠️ Empty transcription result");

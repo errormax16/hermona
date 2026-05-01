@@ -5,7 +5,7 @@ import '../../domain/entities/chat_message.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../questionnaire/domain/entities/user_profile.dart';
 import '../../../prediction/domain/entities/prediction_result.dart';
-import 'groq_service.dart';
+// import removed
 
 class ChatApiService implements ChatRepository {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -108,8 +108,15 @@ class ChatApiService implements ChatRepository {
   @override
   Future<String> transcribeAudio(String path) async {
     try {
-      final groqService = GroqService();
-      return await groqService.transcribeWhisper(path);
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(path, filename: 'audio.m4a'),
+      });
+      
+      // Forcer l'URL de base pour éviter tout cache persistant
+      _dio.options.baseUrl = 'http://10.202.31.129:8000';
+      
+      final response = await _dio.post('/transcribe', data: formData);
+      return response.data['text'] ?? '';
     } catch (e) {
       throw Exception('Erreur de transcription : $e');
     }

@@ -21,8 +21,9 @@ from io import BytesIO
 
 from app.model import get_model
 
-# Charger les variables d'environnement
-load_dotenv()
+# Charger les variables d'environnement depuis le dossier app/
+env_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(env_path)
 
 # Configuration Logging
 logging.basicConfig(level=logging.INFO)
