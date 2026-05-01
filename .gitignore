@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+.env
+backend/app/.env
+backend/model/*.ptgit commit -m "remove .env from repo"

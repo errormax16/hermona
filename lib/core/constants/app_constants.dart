@@ -5,7 +5,7 @@ class AppConstants {
   // ── Backend Python ──────────────────────────────────────────────────────────
   /// URL de base de votre API Python.
   /// Changez cette valeur quand votre backend est déployé.
-  static const String apiBaseUrl = 'http://localhost:8000';
+  static const String apiBaseUrl = 'http://10.202.31.129:8000';
 
   // ── Appwrite ────────────────────────────────────────────────────────────────
   static const String appwriteEndpoint  = 'https://cloud.appwrite.io/v1';

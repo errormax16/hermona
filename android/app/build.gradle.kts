@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.acneia.acneia"
 
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
 
     // 🔥 IMPORTANT FIX NDK Firebase
     ndkVersion = "27.0.12077973"
@@ -25,7 +25,7 @@ android {
     defaultConfig {
         applicationId = "com.acneia.acneia"
 
-        minSdk = flutter.minSdkVersion
+        minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

@@ -48,13 +48,16 @@ dependencies:
   # Utils
   shared_preferences: ^2.2.2
   intl: 0.20.2
-  path_provider: ^2.1.2
-  permission_handler: ^11.2.0
+  path_provider: ^2.1.5
+  permission_handler: ^12.0.1
 
   # Icons
   iconsax: 0.0.8
   google_fonts: ^6.1.0
   flutter_svg: ^2.0.9
+  record: ^6.0.0
+  flutter_tts: ^4.2.5
+  flutter_dotenv: ^6.0.1
 
 dev_dependencies:
   flutter_test:

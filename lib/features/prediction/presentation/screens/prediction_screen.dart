@@ -64,10 +64,22 @@ class _PredictionScreenState extends State<PredictionScreen> {
 
   Future<void> _predict() async {
     setState(() => _loading = true);
-    final uid  = FirebaseAuth.instance.currentUser?.uid;
-    final res  = await _svc.predict(_answers);
-    if (uid != null) await _svc.saveResult(res, uid);
-    setState(() { _result = res; _loading = false; });
+    try {
+      final uid  = FirebaseAuth.instance.currentUser?.uid;
+      final res  = await _svc.predict(_answers);
+      if (uid != null) {
+        try { await _svc.saveResult(res, uid); } catch (_) {}
+      }
+      if (mounted) setState(() { _result = res; _loading = false; });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Erreur: $e'),
+          backgroundColor: AppColors.error,
+        ));
+      }
+    }
   }
 
   @override

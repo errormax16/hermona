@@ -37,7 +37,7 @@ class DetectionApiService implements DetectionRepository {
       }
 
       final response = await _dio.post<Map<String, dynamic>>(
-        '/predict',
+        '/detect',
         data: formData,
       );
 

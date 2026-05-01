@@ -1,4 +1,7 @@
 import 'package:equatable/equatable.dart';
+import '../../../questionnaire/domain/entities/user_profile.dart';
+import '../../../prediction/domain/entities/prediction_result.dart';
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DOMAIN – Chat Entities & Repository
@@ -8,12 +11,16 @@ class ChatMessage extends Equatable {
   final String role;      // 'user' | 'assistant'
   final String content;
   final DateTime timestamp;
+  final bool isVoice;
+  final String? audioUrl;
 
   const ChatMessage({
     required this.id,
     required this.role,
     required this.content,
     required this.timestamp,
+    this.isVoice = false,
+    this.audioUrl,
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> j) => ChatMessage(
@@ -21,11 +28,14 @@ class ChatMessage extends Equatable {
     role     : j['role']      as String,
     content  : j['content']   as String,
     timestamp: DateTime.parse(j['timestamp'] as String),
+    isVoice  : j['isVoice']   as bool? ?? false,
+    audioUrl : j['audioUrl']  as String?,
   );
 
   Map<String, dynamic> toJson() => {
     'id': id, 'role': role,
     'content': content, 'timestamp': timestamp.toIso8601String(),
+    'isVoice': isVoice, 'audioUrl': audioUrl,
   };
 
   @override
@@ -39,9 +49,13 @@ abstract class ChatRepository {
   Future<String> getResponse({
     required List<ChatMessage> history,
     required String userMessage,
+    UserProfile? profile,
+    PredictionResult? prediction,
   });
+
 
   Future<List<ChatMessage>> loadHistory(String userId);
   Future<void> saveMessage(ChatMessage msg, String userId);
   Future<void> clearHistory(String userId);
+  Future<String> transcribeAudio(String path);
 }
